@@ -112,28 +112,80 @@ $(document).ready(function () {
 
 
     function test(qNum) {
-        questiondone = false;
         console.log("init ", quiz[qNum]);
+        $('body').off('click', '.choice');  // remove click to avoid assocition with previous
         displayquestions(quiz[qNum]);
 
-        $('#gametest').on("click", function () {
-            console.log("clicked");
-            console.log(quiz[qNum]);
-            questiondone = true;
+
+        function nextQuestion() {
+            console.log("test next question");
+            clearTimeout(qTimerObj);  // clear the timer
+            $('body').off('click','.choice');
+            $('body').off('click','nextQ');
             qNum++;
             if (qNum < questions.length) {
-                $('#gametest').off("click");
                 setTimeout(function () {
-                    console.log("Did I get clicked?");
+                    console.log("Generic");
                     test(qNum);
+                }, waitNextQ);
+            } else {
+                // call done function
+                $('#gametest').text("done!");
+                console.log("done!");
+            }
+        }
 
-                }, 2000);
+        // reassign click event to just created choices
+        $('body').on('click', '.choice', function () {
+            choiceid = $(this).attr("choiceid");
+            choicevalue = $(this).text();
+            console.log(this);
+            console.log("selected " + choiceid + " " + choicevalue);
+        })
+
+        // timer for question
+        var qTimerObj = setTimeout(function () {
+            alert("Times UP!");
+            clearTimeout(qTimerObj);  // clear the timer
+            $('body').off('click','.choice');
+            $('body').off('click','nextQ');
+            qNum++;
+            if (qNum < questions.length) {
+                setTimeout(function () {
+                    console.log("next question from timeout");
+                    test(qNum);
+                }, waitNextQ);
+            } else {
+                // call done function
+                $('#gametest').text("done!");
+                console.log("done!");
+            }
+        }, qTimer)
+
+        // click next question
+        $('body').on("click", ".nextQ", function () {
+            console.log("clicked");
+            console.log(quiz[qNum]);
+            clearTimeout(qTimerObj);  // clear the timer
+            $('body').off('click','.choice');
+            $('body').off('click','nextQ');
+            qNum++;
+            if (qNum < questions.length) {
+                setTimeout(function () {
+                    console.log("Next Questions from click");
+                    test(qNum);
+                }, waitNextQ);
             } else {
                 $('#gametest').text("done!");
                 console.log("done!");
             }
 
         })
+
+
+
+
+
     }
 
 
@@ -146,10 +198,11 @@ $(document).ready(function () {
         var options = "";
         for (i = 0; i < questionObj.choices.length; i++) {
             console.log(questionObj.choices[i]);
-            options = options + "<p>" + questionObj.choices[i] + "</p>";
+            options = options + "<div class='choice blah' choiceid='" + i + "'>" + questionObj.choices[i] + "</div>";
         }
         question.text(questionObj.question);
-        submitBtn.text("Click Me")
+        submitBtn.text("Next Question");
+        submitBtn.addClass("nextQ");
         questiondiv.append(question);
         questiondiv.append(options);
         questiondiv.append(submitBtn);
@@ -163,6 +216,8 @@ $(document).ready(function () {
 
     var questiondone = false;
     var quizQNum = 0;
+    var waitNextQ = 2000;  // wait 2000 ms before showing next question
+    var qTimer = 5000;  // 5 seconds to answer question
     test(quizQNum);
 
 
