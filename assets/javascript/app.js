@@ -59,100 +59,128 @@ $(document).ready(function () {
 
     quiztest = [
         {
-            question: "1. Which is number 3?",
-            choices: ["1-op", "2-op", "3-op", "4-op"],
+            question: "Which is number 3?",
+            choices: ["number 1", "number 2", "number 3", "number 4"],
             answer: 2,
             currentAnswer: -10,
+            imgSrc: "",
         },
         {
-            question: "2. Which is number 1?",
-            choices: ["1-ap", "2-ap", "3-ap", "4-ap"],
+            question: "Which is number 1?",
+            choices: ["number 1", "number 2", "number 3", "number 4"],
             answer: 0,
             currentAnswer: -10,
+            imgSrc: "",
         },
         {
-            question: "3. Which is number 4?",
-            choices: ["1-op", "2-op", "3-op", "4-op"],
+            question: "Which is number 4?",
+            choices: ["number 1", "number 2", "number 3", "number 4"],
             answer: 3,
             currentAnswer: -10,
+            imgSrc: "",
         },
         {
-            question: "4. Which is number 2?",
-            choices: ["1-op", "2-op", "3-op", "4-op"],
+            question: "Which is number 2?",
+            choices: ["number 1", "number 2", "number 3", "number 4"],
             answer: 1,
             currentAnswer: -10,
+            imgSrc: "",
         },
         {
-            question: "5. Which is number 5?",
-            choices: ["1-op", "5-op", "3-op", "4-op", "9-op", "6-op"],
+            question: "Which is number 5?",
+            choices: ["number 1", "number 5", "number 3", "number 4", "number 9", "number 6"],
             answer: 1,
             currentAnswer: -10,
+            imgSrc: "",
         },
         {
-            question: "6. Which is number 8?",
-            choices: ["1-op", "2-op", "8-op", "4-op", "5-op"],
+            question: "Which is number 8?",
+            choices: ["number 1", "number 2", "number 8", "number 4", "number 5"],
             answer: 2,
             currentAnswer: -10,
+            imgSrc: "",
         },
     ]
 
-    // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
-    // https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    /*
-    async function test() {
-        for (i = 0; i < questions.length; i++) {
-            console.log(questions[i]);
-            $('#gametest').on("click",function(){
-                console.log("clicked"+questions[i]);
-            })
-            $('#gametest').text(questions[i]);
-
-            await sleep(2000);
-        }
-    }
-    */
-
-
-
-
-
+    // when comlete, this is what is displayed
     function displayDone() {
         console.log("---------> results after test");
-        button = "<br><button id='restart'>Restart</button>";
-        endResults = "Total: " + totalQuestions + " Incorrect: " + totalIncorrect + " totalNoAnswer: " + totalNoAnswer + " totalCorrect: " + totalCorrect;
+        var button = "<br><button id='restart'>Restart</button>";
+        var endResults = "Total Questions: "  + totalQuestions + "<br>Correct Answers: " + totalCorrect + "<br>Incorrect: " + totalIncorrect + "<br>Unanswered: " + totalNoAnswer ;
         endResults += button;
         console.log(endResults);
         return (endResults);
     }
 
-    function displayAnswer(timer, questionObj, timesUp) {
-        console.log("------------> displaying answer")
+    // when time run out or when clicked, this is the asnwer that is displayed
+    function displayAnswer(qNum, questionObj, timesUp, correct) {
+        console.log("------------> displaying answer");
+        var message1 = "";  // say correct answer, incorrect answer, or out of time
+        var message2 = ""; // dispaly correct answer
+        var imgName = "";   
+       
+        if (timesUp) {
+            message1 = "You ran out of time!";
+            timesUp = false;
+        } else {
+            if (correct) {
+                message1 = "Correct!!";
+                correct = false;
+            } else {
+                // highlight wrong answer in red
+                message1 = "Wrong!!";
+                var wrongAnswerIdx = questionObj[qNum].currentAnswer;
+                var jQueryWrongAns = "[choiceid='"+wrongAnswerIdx+"']";
+                $(jQueryWrongAns).addClass("choseWrong");
+            }
+        }
+        // remove hovering class to show answers
+        $(".choice").removeClass('choosing');
+
+        // highlight correct answer in green
+        var correctAnswerIdx = questionObj[qNum].answer;
+        jQueryCorrectAns = "[choiceid='"+correctAnswerIdx+"']";
+        console.log("-------------choice----->"+jQueryCorrectAns);
+        $(jQueryCorrectAns).addClass("choseRight");
+        
+        // create message to display on screen
+        message2 = "Correct Answer was: "+questionObj[qNum].choices[correctAnswerIdx];
+        imgName = "<img src='"+questionObj[qNum].imgSrc+'>';
+        message = "<br>"+message1 + "<br>" + message2 + "<br>" + imgName;
+        $("#questionResults").html(message);
 
     }
 
 
-    function displayQuestion(timer, questionObj) {
+    function displayQuestion(timer, questionObj, qNum, qCount) {
         var questiondiv = $("<div>");
-        var question = $("<h2>");
-
+        var question = $("<h3>");
         var options = "";
+        qNum++;  // question number
+
+        
+
+        // clear previous values
+        $("#question").html("");
+        $("#questionResults").html("");
 
         // create choices from question Object
         for (i = 0; i < questionObj.choices.length; i++) {
             console.log(questionObj.choices[i]);
             options = options + "<div class='choice choosing' choiceid='" + i + "'>" + questionObj.choices[i] + "</div>";
         }
-        question.text(questionObj.question);
+
+        questionNum = "Question "+qNum+" of "+qCount+": ";
+        questionTxt = questionNum + questionObj.question;
+        question.text(questionTxt);
         questiondiv.append(question);
         questiondiv.append(options);
 
 
         startCountDown = timer / 1000;
-        questiondiv.append("<div>Timer: <span id='countdown'>" + startCountDown + "</span></div>")
+        
+        $("#questionTimerDiv").html('Timer: <span id="countdown">'+startCountDown + '</span><hr>');
+        // questiondiv.append("<div>Timer: <span id='countdown'>" + startCountDown + "</span></div>")
         countDown = timer / 1000;
         //console.log("Timer: "+countDown);
         let countDownObj = setInterval(function () {
@@ -167,12 +195,13 @@ $(document).ready(function () {
         return countDownObj; // passing back the interval timer so the original one is referenced and reset
     }
 
-    function test(qNum, quiz) {
+    function triviaQuestion(qNum, quiz) {
 
         console.log("init ", quiz[qNum]);
         $('body').off('click', '.choice');  // remove click to avoid assocition with previous question
-        countObj = displayQuestion(qTimer, quiz[qNum]); // capture the interval countdown object from previous question
+        countObj = displayQuestion(qTimer, quiz[qNum], qNum, quiz.length); // capture the interval countdown object from previous question
         timesUp = false;
+        var correct = false;
 
 
         function nextQuestion(quiz, qTimerObj, countObj) {
@@ -185,7 +214,7 @@ $(document).ready(function () {
             clearTimeout(countObj);  // clear the countdown timer for each question.  This is the interval timer on the screen that goes 5.  4..   3..   2..  1 .  
 
             // display answer
-            displayAnswer(qNum, quiz, timesUp);
+            displayAnswer(qNum, quiz, timesUp, correct);
 
             // increment quiz
             timesUp = false;   // reset timesUp
@@ -193,17 +222,23 @@ $(document).ready(function () {
             if (qNum < parseInt(quiz.length)) {
                 setTimeout(function () {
                     console.log("Generic");
-                    test(qNum, quiz);
+                    triviaQuestion(qNum, quiz);
                 }, waitNextQ);
             } else {
-                $('body').off('click','#restart')
-                endResults = displayDone();
-                $('#question').html(endResults);
-                $('body').on('click', '#restart', function(){
-                    test(quizQNum, initGame(false, quiz));
-                });
-                console.log("done!");
+                setTimeout(function () {
+                    $('body').off('click', '#restart')
+                    endResults = displayDone();
+                    $('#question').html(endResults);
+                    $('#questionResults').html("");
+                    $('body').on('click', '#restart', function () {
+                        triviaQuestion(quizQNum, initGame(false, quiz));
+                    });
+                    console.log("done!");
+                }, waitNextQ)
+
             }
+
+
         }
 
         // reassign click event to just created choices
@@ -212,6 +247,7 @@ $(document).ready(function () {
             quiz[qNum].currentAnswer = parseInt(choiceid); // assign answer to array
             if (quiz[qNum].answer === parseInt(choiceid)) {
                 console.log("you got the right answer! ");
+                correct = true;
                 totalNoAnswer--;
                 totalCorrect++;
             } else {
@@ -229,7 +265,6 @@ $(document).ready(function () {
         var qTimerObj = setTimeout(function () {
             $("#countdown").html(0);   // show countdown value of "0"
             quiz[qNum].currentAnswer = -10;
-            alert("Times UP!");
             timesUp = true;
             nextQuestion(quiz, qTimerObj, countObj);
         }, qTimer);
@@ -258,6 +293,14 @@ $(document).ready(function () {
 
     // restart game, if useAPI, generate new questison from API, if redo preivous questions, take it from there as well.  
     function initGame(useAPI, quizObj) {
+        $("#question").html("");
+        $("#questionResults").html("");
+
+        quizQNum = 0;   // starting question
+        totalQuestions = quizObj.length;
+        totalIncorrect = 0;  // selected wrong answer
+        totalNoAnswer = quizObj.length; // skipped or did not answer in time
+        totalCorrect = 0;
 
         if (!useAPI) {
             // create a copy of the test quiz 
@@ -271,24 +314,49 @@ $(document).ready(function () {
     }
 
 
-    var questiondone = false;
-    var quizQNum = 0;   // starting question
-    var waitNextQ = 2000;  // wait 2000 ms before showing next question
-    var qTimer = 10000;  // seconds to answer each question
+
+    // initialize variables for trivia
+    var quizQNum = 0;   // initialize starting question
+    var waitNextQ = 5000;  // how long to display answer before automatically going to another question
+    var qTimer = 9000;  // seconds to answer each question
     var totalQuestions = quiztest.length;
     var totalIncorrect = 0;  // selected wrong answer
     var totalNoAnswer = quiztest.length; // skipped or did not answer in time
     var totalCorrect = 0;
 
 
-
-
-    $('body').on("click","#startGame", function() {
-        test(quizQNum, initGame(false, quiztest));
+    // initialize game with the first click. 
+    $('body').on("click", "#startGame", function () {
+        triviaQuestion(quizQNum, initGame(false, quiztest));
     });
-    
+
 
 
 });
+
+
+
+/*  to study another time.   promise, async, and await .
+
+    // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+    // https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404 
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /*
+    async function triviaQuestion() {
+        for (i = 0; i < questions.length; i++) {
+            console.log(questions[i]);
+            $('#gametest').on("click",function(){
+                console.log("clicked"+questions[i]);
+            })
+            $('#gametest').text(questions[i]);
+
+            await sleep(2000);
+        }
+    }
+    */
+
 
 
