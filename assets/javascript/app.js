@@ -54,34 +54,45 @@ reload button
 */
 console.log("Test");
 $(document).ready(function () {
-    $("#gametest").text("What's UP?!");
 
     questions = ['question1', 'question2', 'question3', 'question4'];
 
-    quiz = [
+    quiztest = [
         {
             question: "1. Which is number 3?",
             choices: ["1-op", "2-op", "3-op", "4-op"],
             answer: 2,
-            currentAnswer: 10,
+            currentAnswer: -10,
         },
         {
             question: "2. Which is number 1?",
             choices: ["1-ap", "2-ap", "3-ap", "4-ap"],
             answer: 0,
-            currentAnswer: 10,
+            currentAnswer: -10,
         },
         {
             question: "3. Which is number 4?",
-            choices: [1, 2, 3, 4],
+            choices: ["1-op", "2-op", "3-op", "4-op"],
             answer: 3,
-            currentAnswer: 10,
+            currentAnswer: -10,
         },
         {
             question: "4. Which is number 2?",
-            choices: [1, 2, 3, 4],
+            choices: ["1-op", "2-op", "3-op", "4-op"],
             answer: 1,
-            currentAnswer: 10,
+            currentAnswer: -10,
+        },
+        {
+            question: "5. Which is number 5?",
+            choices: ["1-op", "5-op", "3-op", "4-op", "9-op", "6-op"],
+            answer: 1,
+            currentAnswer: -10,
+        },
+        {
+            question: "6. Which is number 8?",
+            choices: ["1-op", "2-op", "8-op", "4-op", "5-op"],
+            answer: 2,
+            currentAnswer: -10,
         },
     ]
 
@@ -109,28 +120,88 @@ $(document).ready(function () {
 
 
 
+    function displayDone() {
+        console.log("---------> results after test");
+        button = "<br><button id='restart'>Restart</button>";
+        endResults = "Total: " + totalQuestions + " Incorrect: " + totalIncorrect + " totalNoAnswer: " + totalNoAnswer + " totalCorrect: " + totalCorrect;
+        endResults += button;
+        console.log(endResults);
+        return (endResults);
+    }
+
+    function displayAnswer(timer, questionObj, timesUp) {
+        console.log("------------> displaying answer")
+
+    }
 
 
-    function test(qNum) {
+    function displayQuestion(timer, questionObj) {
+        var questiondiv = $("<div>");
+        var question = $("<h2>");
+
+        var options = "";
+
+        // create choices from question Object
+        for (i = 0; i < questionObj.choices.length; i++) {
+            console.log(questionObj.choices[i]);
+            options = options + "<div class='choice choosing' choiceid='" + i + "'>" + questionObj.choices[i] + "</div>";
+        }
+        question.text(questionObj.question);
+        questiondiv.append(question);
+        questiondiv.append(options);
+
+
+        startCountDown = timer / 1000;
+        questiondiv.append("<div>Timer: <span id='countdown'>" + startCountDown + "</span></div>")
+        countDown = timer / 1000;
+        //console.log("Timer: "+countDown);
+        let countDownObj = setInterval(function () {
+            countDown -= 1;
+            //console.log("interval: "+countDown);
+            $("#countdown").html(countDown);
+        }, 1000
+        )
+        //console.log("Entries in questiondiv");
+        //console.log(questiondiv);
+        $('#question').html(questiondiv);
+        return countDownObj; // passing back the interval timer so the original one is referenced and reset
+    }
+
+    function test(qNum, quiz) {
+
         console.log("init ", quiz[qNum]);
-        $('body').off('click', '.choice');  // remove click to avoid assocition with previous
-        displayquestions(quiz[qNum]);
+        $('body').off('click', '.choice');  // remove click to avoid assocition with previous question
+        countObj = displayQuestion(qTimer, quiz[qNum]); // capture the interval countdown object from previous question
+        timesUp = false;
 
 
-        function nextQuestion() {
+        function nextQuestion(quiz, qTimerObj, countObj) {
             console.log("test next question");
-            clearTimeout(qTimerObj);  // clear the timer
-            $('body').off('click','.choice');
-            $('body').off('click','nextQ');
+
+            // remove timers and remove preivous click associations
+            clearTimeout(qTimerObj);  // clear the timer object for each qustion.  This is the timer that allows X secdonds to answer question.  
+            $('body').off('click', '.choice');
+            $('body').off('click', 'nextQ');
+            clearTimeout(countObj);  // clear the countdown timer for each question.  This is the interval timer on the screen that goes 5.  4..   3..   2..  1 .  
+
+            // display answer
+            displayAnswer(qNum, quiz, timesUp);
+
+            // increment quiz
+            timesUp = false;   // reset timesUp
             qNum++;
-            if (qNum < questions.length) {
+            if (qNum < parseInt(quiz.length)) {
                 setTimeout(function () {
                     console.log("Generic");
-                    test(qNum);
+                    test(qNum, quiz);
                 }, waitNextQ);
             } else {
-                // call done function
-                $('#gametest').text("done!");
+                $('body').off('click','#restart')
+                endResults = displayDone();
+                $('#question').html(endResults);
+                $('body').on('click', '#restart', function(){
+                    test(quizQNum, initGame(false, quiz));
+                });
                 console.log("done!");
             }
         }
@@ -138,92 +209,84 @@ $(document).ready(function () {
         // reassign click event to just created choices
         $('body').on('click', '.choice', function () {
             choiceid = $(this).attr("choiceid");
+            quiz[qNum].currentAnswer = parseInt(choiceid); // assign answer to array
+            if (quiz[qNum].answer === parseInt(choiceid)) {
+                console.log("you got the right answer! ");
+                totalNoAnswer--;
+                totalCorrect++;
+            } else {
+                console.log("you got the wrong answer! " + choiceid + " : " + quiz[qNum]);
+                totalNoAnswer--;
+                totalIncorrect++;
+            }
             choicevalue = $(this).text();
-            console.log(this);
+            // console.log(this);
             console.log("selected " + choiceid + " " + choicevalue);
+            nextQuestion(quiz, qTimerObj, countObj);
         })
 
-        // timer for question
+        // what happens when time runs out..   
         var qTimerObj = setTimeout(function () {
+            $("#countdown").html(0);   // show countdown value of "0"
+            quiz[qNum].currentAnswer = -10;
             alert("Times UP!");
-            clearTimeout(qTimerObj);  // clear the timer
-            $('body').off('click','.choice');
-            $('body').off('click','nextQ');
-            qNum++;
-            if (qNum < questions.length) {
-                setTimeout(function () {
-                    console.log("next question from timeout");
-                    test(qNum);
-                }, waitNextQ);
-            } else {
-                // call done function
-                $('#gametest').text("done!");
-                console.log("done!");
-            }
-        }, qTimer)
-
-        // click next question
-        $('body').on("click", ".nextQ", function () {
-            console.log("clicked");
-            console.log(quiz[qNum]);
-            clearTimeout(qTimerObj);  // clear the timer
-            $('body').off('click','.choice');
-            $('body').off('click','nextQ');
-            qNum++;
-            if (qNum < questions.length) {
-                setTimeout(function () {
-                    console.log("Next Questions from click");
-                    test(qNum);
-                }, waitNextQ);
-            } else {
-                $('#gametest').text("done!");
-                console.log("done!");
-            }
-
-        })
-
-
-
-
+            timesUp = true;
+            nextQuestion(quiz, qTimerObj, countObj);
+        }, qTimer);
 
     }
 
+    // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+    // fisher-yates algorithm to shuffle
+    function shuffle(arraysrc) {
+        var currentIndex = arraysrc.length, temporaryValue, randomIndex;
+        while (0 !== currentIndex) {
+            //pick a remaining Element
+            randomIndex = Math.floor(Math.random() * currentIndex);
 
+            currentIndex -= 1;
 
-
-    function displayquestions(questionObj) {
-        var questiondiv = $("<div>");
-        var question = $("<h2>");
-        var submitBtn = $("<button>");
-        var options = "";
-        for (i = 0; i < questionObj.choices.length; i++) {
-            console.log(questionObj.choices[i]);
-            options = options + "<div class='choice blah' choiceid='" + i + "'>" + questionObj.choices[i] + "</div>";
+            // swap with current element
+            temporaryValue = arraysrc[currentIndex];
+            arraysrc[currentIndex] = arraysrc[randomIndex];
+            arraysrc[randomIndex] = temporaryValue;
         }
-        question.text(questionObj.question);
-        submitBtn.text("Next Question");
-        submitBtn.addClass("nextQ");
-        questiondiv.append(question);
-        questiondiv.append(options);
-        questiondiv.append(submitBtn);
 
-        console.log("Entries in questiondiv");
-        console.log(questiondiv);
-        $('#gametest').html(questiondiv);
+        return arraysrc
     }
 
+
+    // restart game, if useAPI, generate new questison from API, if redo preivous questions, take it from there as well.  
+    function initGame(useAPI, quizObj) {
+
+        if (!useAPI) {
+            // create a copy of the test quiz 
+            var newquiz = JSON.parse(JSON.stringify(quizObj));
+
+            // shuffle questions
+            newquiz = shuffle(newquiz);
+        }
+
+        return (newquiz);
+    }
 
 
     var questiondone = false;
-    var quizQNum = 0;
+    var quizQNum = 0;   // starting question
     var waitNextQ = 2000;  // wait 2000 ms before showing next question
-    var qTimer = 5000;  // 5 seconds to answer question
-    test(quizQNum);
+    var qTimer = 10000;  // seconds to answer each question
+    var totalQuestions = quiztest.length;
+    var totalIncorrect = 0;  // selected wrong answer
+    var totalNoAnswer = quiztest.length; // skipped or did not answer in time
+    var totalCorrect = 0;
 
 
 
 
-
+    $('body').on("click","#startGame", function() {
+        test(quizQNum, initGame(false, quiztest));
+    });
+    
 
 
 });
