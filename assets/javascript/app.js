@@ -86,7 +86,7 @@ $(document).ready(function () {
 
     // when time run out or when clicked, this is the asnwer that is displayed
     function displayAnswer(qNum, questionObj, timesUp, correct) {
-        console.log("------------> displaying answer");
+        // console.log("------------> displaying answer");
         var message1 = "";  // say correct answer, incorrect answer, or out of time
         var message2 = ""; // dispaly correct answer
         var imgName = "";
@@ -137,7 +137,7 @@ $(document).ready(function () {
 
         // create choices from question Object
         for (i = 0; i < questionObj.choices.length; i++) {
-            console.log(questionObj.choices[i]);
+            // console.log(questionObj.choices[i]);
             options = options + "<div class='choice choosing' choiceid='" + i + "'>" + questionObj.choices[i] + "</div>";
         }
 
