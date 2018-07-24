@@ -75,7 +75,7 @@ $(document).ready(function () {
     // when quiz is complete, this is what is displayed
     function displayDone() {
         console.log("---------> results after test");
-        var button1 = "<br><button id='startGame'>Restart Game</button><br><button id='loadApiQuestions'>Load 10 New Questions from Trivia API</button><br><span id='loadresults'></span>";
+        var button1 = "<br><button id='startGame'>Restart Game</button><br><button id='loadApiQuestions'>Load 10 Questions from Trivia API</button><br><span id='loadresults'></span>";
         var endResults = "Total Questions: " + totalQuestions + "<br>Correct Answers: " + totalCorrect + "<br>Incorrect: " + totalIncorrect + "<br>Unanswered: " + totalNoAnswer;
         endResults += button1;
         console.log(endResults);
@@ -336,8 +336,8 @@ $(document).ready(function () {
                 activeQuiz = triviaApiAdapter(response.results);
                 //console.log("after function call: ", activeQuiz);
                 //console.log("ajax request loading completed...");
-                $("#loadApiQuestions").html("Load 10 New Questions from Trivia API");
-                $("#loadresults").html("10 New questions from Trivia API successfully loaded");
+                $("#loadApiQuestions").html("Load 10 Questions from Trivia API");
+                $("#loadresults").html("10 questions from Trivia API successfully loaded");
                 $("#startGame").html("Start Game");
                 $("#startGame").removeAttr('disabled');
                 $("#loadApiQuestions").removeAttr('disabled');
