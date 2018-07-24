@@ -16,3 +16,6 @@
     border-color: red;
 }
 
+.choice {
+    cursor: pointer;
+}
