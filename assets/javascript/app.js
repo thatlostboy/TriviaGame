@@ -209,6 +209,7 @@ $(document).ready(function () {
 
         // reassign click event to just created choices
         $('body').on('click', '.choice', function () {
+            event.preventDefault();
             choiceid = $(this).attr("choiceid");
             quiz[qNum].currentAnswer = parseInt(choiceid); // assign answer to array
             if (quiz[qNum].answer === parseInt(choiceid)) {
@@ -360,11 +361,13 @@ $(document).ready(function () {
         $('body').off("click", "#startGame");
         $('body').off("click", "#loadApiQuestions");
         $('body').on("click", "#startGame", function () {
+            event.preventDefault();
             triviaQuestion(quizQNum, activeQuiz);
         });
 
         // load data from API, 
         $('body').on("click", "#loadApiQuestions", function () {
+            event.preventDefault();
             initGame(true, quiztest); // will update the activeQuiz variable with 20 questison from API
         });
     }
