@@ -9,15 +9,27 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
         crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" media="screen" href="assets/css/style.css" />
-    </head>
+</head>
 
 <body>
     <div class="container">
-            <div id="questionTimerDiv"></div>
-            <div id="question"><button id='startGame'>Start Game</button><br><button id='loadApiQuestions'>Load 10 Questions from Trivia API</button><br><span id="loadresults"></span></div>
-            <div id="questionResults"></div>
+        <div id="questionTimerDiv"></div>
+        <div id="question" class="center-block">
+            <button type="button" class="btn btn-success btn-lg btn-block" id='startGame'>Start Game</button>
+        </div>
+        <div id="loadApiDiv">
+            <div>
+                    <button id='loadApiQuestions'>Load 10 New Questions from Trivia API</button>
+            </div> 
+            <div id="loadresults"></div>
+            <hr>
+        </div>
+
+        <div id="questionResults"></div>
     </div>
-    
+   
+    </div>
+
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>

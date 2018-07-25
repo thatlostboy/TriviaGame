@@ -1,28 +1,3 @@
-
-/*
-Basic:
-You'll create a trivia form with multiple choice or true/false options (your choice).
-The player will have a limited amount of time to finish the quiz. 
-The game ends when the time runs out. The page will reveal the number of questions that players answer correctly and incorrectly.
-Don't let the player pick more than one answer per question.
-Don't forget to include a countdown timer.
-
-Advanced:
-You'll create a trivia game that shows only one question until the player answers it or their time runs out.
-If the player selects the correct answer, show a screen congratulating them for choosing the right option. After a few seconds, display the next question -- do this without user input.
-
-The scenario is similar for wrong answers and time-outs.
-
-
-If the player runs out of time, tell the player that time's up and display the correct answer. Wait a few seconds, then show the next question.
-If the player chooses the wrong answer, tell the player they selected the wrong option and then display the correct answer. Wait a few seconds, then show the next question.
-
-
-On the final screen, show the number of correct answers, incorrect answers, and an option to restart the game (without reloading the page).
-
-
-*/
-console.log("Test");
 $(document).ready(function () {
 
     questions = ['question1', 'question2', 'question3', 'question4'];
@@ -72,19 +47,41 @@ $(document).ready(function () {
         },
     ]
 
-    // when quiz is complete, this is what is displayed
+    // initialize variables for trivia
+    var quizQNum = 0;   // initialize starting question
+    var waitNextQ = 2500;  // how many ms to show answer before automatically going to next question
+    var qTimer = 20000;  // milliseconds to answer each question
+    var totalQuestions = quiztest.length;
+    var totalIncorrect = 0;  // selected wrong answer
+    var totalNoAnswer = quiztest.length; // skipped or did not answer in time
+    var totalCorrect = 0;
+    var activeQuiz = [];  // this is the active quiz, quiztest is copied here or API trivia is copied in here
+
+
+
+    // start game with Test Data
+    // provide option to load API Trivia if desired.  
+    initGame(false, quiztest);
+    startGame();
+
+    // when quiz is complete, this is what is displayed. prompts use to restart 
+    // with same questions or load new questions from api
     function displayDone() {
         console.log("---------> results after test");
+        var button1a = '<button type="button" class="btn btn-success btn-lg btn-block" id="startGame">Try Again </button>';
+        var button2 = '<div><button id="loadApiQuestions">Load 10 New Questions from Trivia API</button></div> <div id="loadresults"></div><hr>'
+;
         var button1 = "<br><button id='startGame'>Restart Game</button><br><button id='loadApiQuestions'>Load 10 Questions from Trivia API</button><br><span id='loadresults'></span>";
         var endResults = "Total Questions: " + totalQuestions + "<br>Correct Answers: " + totalCorrect + "<br>Incorrect: " + totalIncorrect + "<br>Unanswered: " + totalNoAnswer;
-        endResults += button1;
+        endResults += button1a;
         console.log(endResults);
         $('#question').html(endResults);
+        $('#loadApiDiv').html(button2);
         $('#questionResults').html("");
         $('#questionTimerDiv').html("");
     }
 
-    // when time run out or when clicked, this is the asnwer that is displayed
+    // when time run out or when clicked, this displays the answer
     function displayAnswer(qNum, questionObj, timesUp, correct) {
         // console.log("------------> displaying answer");
         var message1 = "";  // say correct answer, incorrect answer, or out of time
@@ -122,7 +119,7 @@ $(document).ready(function () {
 
     }
 
-
+    // this is function will render the Question Display
     function displayQuestion(timer, questionObj, qNum, qCount) {
         var questiondiv = $("<div>");
         var question = $("<h4>");
@@ -134,6 +131,7 @@ $(document).ready(function () {
         // clear previous values
         $("#question").html("");
         $("#questionResults").html("");
+        $("#loadApiDiv").html("");
 
         // create choices from question Object
         for (i = 0; i < questionObj.choices.length; i++) {
@@ -166,6 +164,7 @@ $(document).ready(function () {
         return countDownObj; // passing back the interval timer so the original one is referenced and reset
     }
 
+    // this creates the main Question Engine with the click event handlers and calling the display/render functions
     function triviaQuestion(qNum, quiz) {
 
         // console.log("init ", quiz[qNum]);
@@ -198,7 +197,7 @@ $(document).ready(function () {
             } else {
                 setTimeout(function () {
                     displayDone();  // display results and options to restart or load new questions
-                    initGame(false,quiz);  // initialize values with whatever the current quiz is
+                    initGame(false, quiz);  // initialize values with whatever the current quiz is
                     startGame();
                     console.log("done!");
                 }, waitNextQ)
@@ -259,6 +258,8 @@ $(document).ready(function () {
         return arraysrc
     }
 
+    // this will adapter the json data from the opentdb.com trivia API to the one that is
+    // used on this system 
     function triviaApiAdapter(triviaObj) {
 
         // adapt output from free trivia API output at https://opentdb.com/api_config.php
@@ -294,7 +295,8 @@ $(document).ready(function () {
     }
 
 
-    // initialize Game values 
+    // initialize Game values: loads data from existing quiz for reload or loads new data from 
+    // trivia open API 
     function initGame(useAPI, quizObj) {
         // if useAPI is false, use quiztest object for testing
         // if useAPI is true, grab from open trivia API for testing
@@ -324,7 +326,7 @@ $(document).ready(function () {
             $("#startGame").attr("disabled", "disabled");
             $("#loadApiQuestions").attr("disabled", "disabled");
             //console.log("Loading ajax request... ");
-            
+
             // free trivia API:  https://opentdb.com/api_config.php
             var queryURL = 'https://opentdb.com/api.php?amount=10&category=9&difficulty=easy&encode=url3986';
 
@@ -360,29 +362,14 @@ $(document).ready(function () {
         $('body').on("click", "#startGame", function () {
             triviaQuestion(quizQNum, activeQuiz);
         });
-    
+
         // load data from API, 
         $('body').on("click", "#loadApiQuestions", function () {
             initGame(true, quiztest); // will update the activeQuiz variable with 20 questison from API
         });
     }
 
-    // initialize variables for trivia
-    var quizQNum = 0;   // initialize starting question
-    var waitNextQ = 3000;  // how many ms to show answer before automatically going to next question
-    var qTimer = 20000;  // milliseconds to answer each question
-    var totalQuestions = quiztest.length;
-    var totalIncorrect = 0;  // selected wrong answer
-    var totalNoAnswer = quiztest.length; // skipped or did not answer in time
-    var totalCorrect = 0;
-    var activeQuiz = [];  // this is the active quiz, quiztest is copied here or API trivia is copied in here
 
-
-
-    // start game with Test Data
-    // provide option to load API Trivia if desired.  
-    initGame(false, quiztest);
-    startGame();
 
 });
 
